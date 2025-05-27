@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Rep Counter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resetBtn {
+            background-color: #f44336;
+        }
+        #resetBtn:hover {
+            background-color: #da190b;
+        }
+        #repDisplay {
+            font-size: 24px;
+            margin: 10px 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Exercise Rep Counter</h1>
+        <div>
+            <label for="exerciseName">Exercise Name:</label>
+            <input type="text" id="exerciseName" placeholder="e.g., Pushups" value="Pushups">
+        </div>
+        <div>
+            <label for="repInput">Reps per Set:</label>
+            <input type="number" id="repInput" min="1" value="10">
+        </div>
+        <div>
+            <label for="goalInput">Daily Goal:</label>
+            <input type="number" id="goalInput" min="1" value="100">
+        </div>
+        <div id="repDisplay">Total Reps: 0 / Goal: 100</div>
+        <button onclick="addReps()">Add Reps</button>
+        <button id="resetBtn" onclick="resetReps()">Reset for New Day</button>
+    </div>
+
+    <script>
+        // Function to set a cookie
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + d.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        // Function to get a cookie
+        function getCookie(name) {
+            const cname = name + "=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(cname) == 0) {
+                    return c.substring(cname.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        // Initialize variables
+        let totalReps = 0;
+        let goal = 100;
+        let exerciseName = "Pushups";
+
+        // Load from cookies on page load
+        window.onload = function() {
+            const savedReps = getCookie("totalReps");
+            const savedGoal = getCookie("goal");
+            const savedExercise = getCookie("exerciseName");
+
+            if (savedReps) totalReps = parseInt(savedReps);
+            if (savedGoal) {
+                goal = parseInt(savedGoal);
+                document.getElementById("goalInput").value = goal;
+            }
+            if (savedExercise) {
+                exerciseName = savedExercise;
+                document.getElementById("exerciseName").value = savedExercise;
+            }
+
+            updateDisplay();
+        };
+
+        // Function to update the display
+        function updateDisplay() {
+            document.getElementById("repDisplay").innerText = `Total Reps: ${totalReps} / Goal: ${goal}`;
+        }
+
+        // Function to add reps
+        function addReps() {
+            const repInput = parseInt(document.getElementById("repInput").value);
+            exerciseName = document.getElementById("exerciseName").value;
+            goal = parseInt(document.getElementById("goalInput").value);
+
+            if (repInput > 0) {
+                totalReps += repInput;
+                updateDisplay();
+
+                // Save to cookies (set to expire in 1 day)
+                setCookie("totalReps", totalReps, 1);
+                setCookie("goal", goal, 1);
+                setCookie("exerciseName", exerciseName, 1);
+
+                // Check if goal is reached
+                if (totalReps >= goal) {
+                    alert(`Congratulations! You've reached your goal of ${goal} ${exerciseName}!`);
+                }
+            } else {
+                alert("Please enter a valid number of reps.");
+            }
+        }
+
+        // Function to reset reps for a new day
+        function resetReps() {
+            totalReps = 0;
+            updateDisplay();
+
+            // Reset cookies
+            setCookie("totalReps", totalReps, 1);
+        }
+    </script>
+</body>
+</html>
